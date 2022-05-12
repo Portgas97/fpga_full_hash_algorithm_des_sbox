@@ -4,19 +4,9 @@
 import string
 import random
 
-
-def ascii_to_binary(ascii_char):
-    ascii_char = ascii_char.encode('ascii')
-    binascii = int.from_bytes(ascii_char,'big')
-    binary_output = bin(binascii)
-    return binary_output
-
-alphabet = list(string.printable)
-# print("alphabet:\n")
-# print(alphabet)
-alphabet = [ ascii_to_binary(a) for a in alphabet]
-# print("alphabet ASCII:\n")
-# print(alphabet)
+# ############################################################################ #
+# # # # # # # # # # # # # # # # # # COSTANTS # # # # # # # # # # # # # # # # # # 
+# ############################################################################ #
 
 # H initialization value
 H_init = [b'0100',b'1011',b'0111',b'0001',b'1101',b'1111',b'0000',b'0011']
@@ -34,6 +24,22 @@ des_sbox = [
     # 11
     [b'1011', b'1000', b'1100', b'0111', b'0001', b'1110', b'0010', b'1101', b'0110', b'1111', b'0000', b'1001', b'1100', b'0100', b'0101', b'0011']
     ]
+
+# utility function to convert an ASCII character in its binary string representation
+def ascii_to_binary(ascii_char):
+    ascii_char = ascii_char.encode('ascii')
+    binascii = int.from_bytes(ascii_char,'big')
+    binary_output = bin(binascii)
+    return binary_output
+
+# list of ASCII printable characters
+alphabet = list(string.printable)
+print("alphabet:\n", alphabet)
+
+# list of ASCII printable characters in binary representation
+binary_alphabet = [ ascii_to_binary(a) for a in alphabet]
+print("binary_alphabet :\n", binary_alphabet)
+
 
 # message input
 print("Insert the message you want to hash:")
