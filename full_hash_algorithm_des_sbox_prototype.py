@@ -5,7 +5,7 @@ import string
 import random
 
 # ############################################################################ #
-# # # # # # # # # # # # # # # # # # COSTANTS # # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # #   COSTANTS   # # # # # # # # # # # # # # # # # 
 # ############################################################################ #
 
 # H initialization value
@@ -25,12 +25,21 @@ des_sbox = [
     [b'1011', b'1000', b'1100', b'0111', b'0001', b'1110', b'0010', b'1101', b'0110', b'1111', b'0000', b'1001', b'1100', b'0100', b'0101', b'0011']
     ]
 
+
+# ############################################################################ #
+# # # # # # # # # # # # # # #   UTILITY  FUNCTIONS   # # # # # # # # # # # # # # 
+# ############################################################################ #
 # utility function to convert an ASCII character in its binary string representation
 def ascii_to_binary(ascii_char):
     ascii_char = ascii_char.encode('ascii')
     binascii = int.from_bytes(ascii_char,'big')
     binary_output = bin(binascii)
     return binary_output
+
+
+# ############################################################################ #
+# # # # # # # # # # # # # # # # # #   MAIN   # # # # # # # # # # # # # # # # # # 
+# ############################################################################ #
 
 # list of ASCII printable characters
 alphabet = list(string.printable)
