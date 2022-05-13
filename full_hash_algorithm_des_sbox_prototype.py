@@ -1,11 +1,12 @@
 # Prototype for the project of Hardware and Embedded Security 2021/2022, Unipi
 # Candidates: Francesco Venturini & Pierfrancesco Bigliazzi
 # Professors: Sergio Saponara & Luca Crocetti
+from curses.ascii import LF
 from math import floor
 import string
 
 # ############################################################################ #
-# # # # # # # # # # # # # # # # #   CONSTANTS   # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # #   CONSTANTS  # # # # # # # # # # # # # # # # # 
 # ############################################################################ #
 
 H_init = [b'0100',b'1011',b'0111',b'0001',b'1101',b'1111',b'0000',b'0011']
@@ -41,10 +42,9 @@ def ascii_to_binary(ascii_char):
     return f"{binascii:08b}"
 
 
-def rotl(input,d): 
+def rotl(input, d): 
     # slice string in two parts for left and right
-    print(type(input))
-    print(input) 
+    # print(input) 
     Lfirst = input[0:d] 
     Lsecond = input[d:]   
     # print ("Left Rotation : ", (Lsecond + Lfirst))
@@ -81,7 +81,10 @@ def compute_sbox(msg_char):
     return sbox_output
 
 def xor(a, b):
-    return bytes([_a ^ _b for _a, _b in zip(a, b)])
+    list = [_a ^ _b for _a, _b in zip(a, b)]
+    string = ''.join(str(e) for e in list)
+    bin_string = bytes(string, "ascii")
+    return bin_string
 
 # TO CHECK
 def full_hash(H, msg_char):
@@ -92,16 +95,20 @@ def full_hash(H, msg_char):
     for r in range(4):
         print("\n###########################################  ROUND " + str(r) + "  ###########################################")
         for i in range(8):
-            print("\n ############# Iterazione: ", i)
+            print("\n------------ Iterazione: " + str(i) + " ------------")
 
             # print(H[(i+1) % 8])
             # print(sbox_value)
             # print(xor(H[(i+1) % 8], sbox_value))
             tmp = (xor(H[(i+1) % 8], sbox_value))
-            # print("H_tmp["+str(i)+"]: ", H_tmp[i])
-
-            H_tmp.append(rotl(tmp, floor(i/2)))
-            print("iteration result: ", H_tmp[i])
+            print("tmp: ", tmp)
+            H_tmp.insert(i, rotl(tmp, floor(i/2)))
+            print("iteration result H: ", H_tmp)
+        print()
+        print("Old H: ", H)
+        H = H_tmp.copy()
+        print("New H: ", H) 
+        H_tmp = []
     H_global = H_tmp
 
 
