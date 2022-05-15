@@ -41,6 +41,12 @@ def ascii_to_binary(ascii_char):
     # print("binary_output: ", binary_output)
     return f"{binascii:08b}"
 
+def int_to_binary_64(int_length):
+    #convert the length of the message in 64 bits
+    binlength = f"{int_length:064b}"
+    print("Length in 64 bits: " + str(binlength))
+    return binlength
+
 
 def rotl(input, d): 
     # slice string in two parts for left and right
@@ -65,6 +71,29 @@ def compression_function(char_8bit):
                 + str(int(char_8bit[5]) ^ int(char_8bit[4]))
     print("Compress function output: ", char_6bit) #  001010 with input 'A'
     return char_6bit
+
+def final_compression_function(char_64bit,index):
+    #this is to have [0] as the LSB
+    print("Before inversion: ",char_64bit)
+    char_64bit = char_64bit[::-1]
+    print("After inversion: ",char_64bit)#if the length is 1 byte then we all 0s except the LSB which is 00000001 
+    dim = 8
+    char_6bit_index = str(int(char_64bit[(index*dim) + 7]) ^ int(char_64bit[(index*dim) + 1])) \
+                      + char_64bit[(index*dim) + 3] \
+                      + char_64bit[(index*dim) + 2] \
+                      + str(int(char_64bit[(index*dim) + 5]) ^ int(char_64bit[(index*dim) + 0])) \
+                      + char_64bit[(index*dim) + 4] \
+                      + char_64bit[(index*dim) + 6]
+    #if the length is 1 byte then we have
+    #C6[0] = 000100
+    #C6[1] = 000000
+    #C6[2] = 000000
+    #C6[3] = 000000
+    #C6[4] = 000000
+    #C6[5] = 000000
+    #C6[6] = 000000
+    #C6[7] = 000000
+    return char_6bit_index
 
 # TO CHECK
 def compute_sbox(msg_char):
@@ -110,6 +139,14 @@ def full_hash(H, msg_char):
         print("New H: ", H) 
         H_tmp = []
     H_global = H_tmp
+    
+#TO CHECK
+def final_hash(H,msg_length):
+    msg_length = int_to_binary_64(msg_length)
+    for i in range(8):
+        print("Iterazione: " + str(i))
+        c6_index = final_compression_function(msg_length,i)
+        print("C6["  + str(i) + "] = " +str(c6_index))
 
 
 # ############################################################################ #
@@ -138,6 +175,7 @@ H_global = H_init
 for i in range(len):
     print("Character: ", msg_list[i])
     full_hash(H_global, msg_list[i])
+    #final_hash(H_global,len)
 
 # TODO ...
 
