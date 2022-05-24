@@ -47,7 +47,6 @@ def int_to_binary_64(int_length):
     print("Length in 64 bits: " + str(binlength))
     return binlength
 
-
 def rotl(input, d): 
     # slice string in two parts for left and right
     # print(input) 
@@ -57,9 +56,8 @@ def rotl(input, d):
     # now concatenate two parts together 
     return Lsecond + Lfirst
 
-
 def compression_function(char_8bit):
-    # this is to have [0] as the LSB
+    # have [0] as the LSB
     # print("Before inversion: ", char_8bit)
     char_8bit = char_8bit[::-1]
     # print("After inversion: ", char_8bit)
@@ -72,30 +70,6 @@ def compression_function(char_8bit):
     print("Compress function output: ", char_6bit) #  001010 with input 'A'
     return char_6bit
 
-def final_compression_function(char_64bit,index):
-    #this is to have [0] as the LSB
-    print("Before inversion: ",char_64bit)
-    char_64bit = char_64bit[::-1]
-    print("After inversion: ",char_64bit)#if the length is 1 byte then we all 0s except the LSB which is 00000001 
-    dim = 8
-    char_6bit_index = str(int(char_64bit[(index*dim) + 7]) ^ int(char_64bit[(index*dim) + 1])) \
-                      + char_64bit[(index*dim) + 3] \
-                      + char_64bit[(index*dim) + 2] \
-                      + str(int(char_64bit[(index*dim) + 5]) ^ int(char_64bit[(index*dim) + 0])) \
-                      + char_64bit[(index*dim) + 4] \
-                      + char_64bit[(index*dim) + 6]
-    #if the length is 1 byte then we have
-    #C6[0] = 000100
-    #C6[1] = 000000
-    #C6[2] = 000000
-    #C6[3] = 000000
-    #C6[4] = 000000
-    #C6[5] = 000000
-    #C6[6] = 000000
-    #C6[7] = 000000
-    return char_6bit_index
-
-# TO CHECK
 def compute_sbox(msg_char):
     print("Computing sbox...")
     msg_char = ascii_to_binary(msg_char)
@@ -115,8 +89,32 @@ def xor(a, b):
     bin_string = bytes(string, "ascii")
     return bin_string
 
-# TO CHECK
+def final_compression_function(char_64bit,index):
+    #this is to have [0] as the LSB
+    print("Before inversion: ",char_64bit)
+    char_64bit = char_64bit[::-1]
+    print("After inversion: ",char_64bit) # length = 1 byte then 00000001 
+    dim = 8
+    char_6bit_index = str(int(char_64bit[(index*dim) + 7]) ^ int(char_64bit[(index*dim) + 1])) \
+                      + char_64bit[(index*dim) + 3] \
+                      + char_64bit[(index*dim) + 2] \
+                      + str(int(char_64bit[(index*dim) + 5]) ^ int(char_64bit[(index*dim) + 0])) \
+                      + char_64bit[(index*dim) + 4] \
+                      + char_64bit[(index*dim) + 6]
+    #if the length is 1 byte then we have
+    #C6[0] = 000100
+    #C6[1] = 000000
+    #C6[2] = 000000
+    #C6[3] = 000000
+    #C6[4] = 000000
+    #C6[5] = 000000
+    #C6[6] = 000000
+    #C6[7] = 000000
+    return char_6bit_index
+
+
 def full_hash(H, msg_char):
+    global H_global
     H_tmp = []
     print("H array: ")
     print(H)
@@ -130,7 +128,7 @@ def full_hash(H, msg_char):
             # print(sbox_value)
             # print(xor(H[(i+1) % 8], sbox_value))
             tmp = (xor(H[(i+1) % 8], sbox_value))
-            print("tmp: ", tmp)
+            print("xor_result: ", tmp)
             H_tmp.insert(i, rotl(tmp, floor(i/2)))
             print("iteration result H: ", H_tmp)
         print()
