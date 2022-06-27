@@ -1,3 +1,4 @@
+
 // This file contains the full_hash_des_sbox front-end RTL description in SystemVerilog for
 // the "Hardware and Embedded Security" course project of the University of Pisa
 // Students: Venturini Francesco, Bigliazzi Pierfrancesco
@@ -7,13 +8,13 @@
 
 // Main module that implements the FSM and instantiates the submodules
 module full_hash_des_box(
-	input rst_n,					// active-low asynchronous reset
-	input clk,						// clock
-	input M_valid,					// input port that signals input validity
-	input [7:0] message,			// message byte intput
-	input [63:0] counter,			// real byte length of the overall message
-	output reg [31:0] digest_out,	// hash value
-	output reg hash_ready			// output port that signals output validity
+	input rst_n,
+	input clk,
+	input M_valid,
+	input [7:0] message,
+	input [63:0] counter,
+	output reg [31:0] digest_out,
+	output reg hash_ready
 );
 
 	// nibbles initialization values for the H[i] variables 
@@ -37,8 +38,7 @@ module full_hash_des_box(
 	reg [7:0] [3:0] H_MAIN;  // used for the main computation
 	reg [7:0] [3:0] H_LAST;  // used for the last computation
 	reg [1:0] STAR;			 // status register for the FSM
-	reg M_VALID_R;			 // to sample M_valid input
-
+	reg M_VALID_R;			 // sample the value of M_valid
 
 	// Store partial results, between different characters of the same message
 	wire [7:0] [3:0] half_hash;	
@@ -202,31 +202,40 @@ module Hash_Round(
     output reg [7:0] [3:0] h_out // new hash values
 );
 
+	reg [3:0] tmp;	
 	always @(*) begin
 
 		// 0
-		h_out[0] = h_main[1] ^ S_Box_value;
+		tmp = h_main[1] ^ S_Box_value;
+		h_out[0] = tmp;
 
 		// 1
-		h_out[1] = h_main[2] ^ S_Box_value;
+		tmp = h_main[2] ^ S_Box_value;
+		h_out[1] = tmp;
 
 		// 2
-		h_out[2] = {h_main[3][2:0] ^ S_Box_value[2:0], h_main[3][3] ^ S_Box_value[3]};
+		tmp = h_main[3] ^ S_Box_value; 
+		h_out[2] = {tmp[2:0], tmp[3]};
 
 		// 3
-		h_out[3] = {h_main[4][2:0] ^ S_Box_value[2:0], h_main[4][3] ^ S_Box_value[3]};
+		tmp = h_main[4] ^ S_Box_value; 
+		h_out[3] = {tmp[2:0], tmp[3]};
 
 		// 4
-		h_out[4] = {h_main[5][1:0] ^ S_Box_value[1:0], h_main[5][3:2] ^ S_Box_value[3:2]};
+		tmp = h_main[5] ^ S_Box_value; 
+		h_out[4] = {tmp[1:0], tmp[3:2]};
 
 		// 5
-		h_out[5] = {h_main[6][1:0] ^ S_Box_value[1:0], h_main[6][3:2] ^ S_Box_value[3:2]};
+		tmp = h_main[6] ^ S_Box_value; 
+		h_out[5] = {tmp[1:0], tmp[3:2]};
 
 		// 6
-		h_out[6] = {h_main[7][0] ^ S_Box_value[0], h_main[7][3:1] ^ S_Box_value[3:1]}; 
+		tmp = h_main[7] ^ S_Box_value; 
+		h_out[6] = {tmp[0], tmp[3:1]};
 
 		// 7
-		h_out[7] = {h_main[0][0] ^ S_Box_value[0], h_main[0][3:1] ^ S_Box_value[3:1]};
+		tmp = h_main[0] ^ S_Box_value; 
+		h_out[7] = {tmp[0], tmp[3:1]};
 	end
 
 endmodule
@@ -243,6 +252,7 @@ module H_last_computation(
 
 	reg [7:0] [5:0] idx;
 	reg [7:0] [3:0] S_value;
+	reg [7:0] [3:0] tmp;
 	reg [7:0] [3:0] h_out;
 
 	// 0
@@ -252,7 +262,7 @@ module H_last_computation(
 		);
 	S_Box Sbox0(
 		.in(idx[0]), 
-		.out(S_value[7])	
+		.out(S_value[7])
 		);
 	
 	// 1
@@ -327,22 +337,29 @@ module H_last_computation(
 	
 
 	always @(*) begin
-		
-		h_out[0] = H_main[1] ^ S_value[0];
+		tmp[0] = H_main[1] ^ S_value[0];
+		h_out[0] = tmp[0];
 
-		h_out[1] = H_main[2] ^ S_value[1];
+		tmp[1] = H_main[2] ^ S_value[1];
+		h_out[1] = tmp[1];
 
-		h_out[2] = {H_main[3][2:0] ^ S_value[2][2:0], H_main[3][3] ^ S_value[2][3]};
-		
-		h_out[3] = {H_main[4][2:0] ^ S_value[3][2:0], H_main[4][3] ^ S_value[3][3]};
+		tmp[2] = H_main[3] ^ S_value[2];
+		h_out[2] = {tmp[2][2:0], tmp[2][3]};
 
-		h_out[4] = {H_main[5][1:0] ^ S_value[4][1:0], H_main[5][3:2] ^ S_value[4][3:2]};
-	
-		h_out[5] = {H_main[6][1:0] ^ S_value[5][1:0], H_main[6][3:2] ^ S_value[5][3:2]};
+		tmp[3] = H_main[4] ^ S_value[3];
+		h_out[3] = {tmp[3][2:0], tmp[3][3]};
 
-		h_out[6] = {H_main[7][0] ^ S_value[6][0], H_main[7][3:1] ^ S_value[6][3:1]};
+		tmp[4] = H_main[5] ^ S_value[4];
+		h_out[4] = {tmp[4][1:0], tmp[4][3:2]};
 
-		h_out[7] = {H_main[0][0] ^ S_value[7][0], H_main[0][3:1] ^ S_value[7][3:1]};
+		tmp[5] = H_main[6] ^ S_value[5];
+		h_out[5] = {tmp[5][1:0], tmp[5][3:2]};
+
+		tmp[6] = H_main[7] ^ S_value[6];
+		h_out[6] = {tmp[6][0], tmp[6][3:1]};
+
+		tmp[7] = H_main[0] ^ S_value[7];
+		h_out[7] = {tmp[7][0], tmp[7][3:1]};
 		
 		H_last = {h_out[7], h_out[6], h_out[5], h_out[4], h_out[3], h_out[2], h_out[1], h_out[0]};
 	end
@@ -356,8 +373,9 @@ endmodule
 /************************************** UTILITY FUNCTIONS **************************************/
 
 
+
 //Final operation, it trasnforms one byte of the message length counter into a 6-bit value 
-module Counter_to_C_6(input [7:0] in_c, output reg [5:0] out_c);
+module Counter_to_C_6( input [7:0] in_c, output reg [5:0] out_c);
 	always @(*) begin
 		out_c = {in_c[7] ^ in_c[1], in_c[3], in_c[2], in_c[5] ^ in_c[0], in_c[4], in_c[6]};
 	end
@@ -367,33 +385,63 @@ endmodule
 // This module implements a LUT version of the DES S-box
 // The first and the last bits of the input select the row of the S-Box
 // The 4 central bits select the column of the S-box
-module S_Box (input [5 : 0] in, output reg [3 : 0] out);
+module S_Box(input [5:0] in, output reg [3:0] out);
 
-    reg [1 : 0] row ;
-    reg [3 : 0] colum;
+  	reg [1:0] row;
+  	reg [3:0] column;
+   
+   	always @(*) begin
 
-    always @(*) begin
+    	row = {in[5], in[0]};
+    	column = in[4:1];
+	
+    	case(row)
+			2'b00: 
+				case(column)
+					4'b0000: out = 4'b0010; 4'b0001: out = 4'b1100;
+					4'b0010: out = 4'b0100; 4'b0011: out = 4'b0001;
+					4'b0100: out = 4'b0111; 4'b0101: out = 4'b1010;
+					4'b0110: out = 4'b1011; 4'b0111: out = 4'b0110;
+					4'b1000: out = 4'b1000; 4'b1001: out = 4'b0101;
+					4'b1010: out = 4'b0011; 4'b1011: out = 4'b1111;
+					4'b1100: out = 4'b1101; 4'b1101: out = 4'b0000;
+					4'b1110: out = 4'b1110; 4'b1111: out = 4'b1001;
+				endcase
+			2'b01: 
+				case(column)
+					4'b0000: out = 4'b1110; 4'b0001: out = 4'b1011;
+					4'b0010: out = 4'b0010; 4'b0011: out = 4'b1100;
+					4'b0100: out = 4'b0100; 4'b0101: out = 4'b0111;
+					4'b0110: out = 4'b1101; 4'b0111: out = 4'b0001;
+					4'b1000: out = 4'b0101; 4'b1001: out = 4'b0000;
+					4'b1010: out = 4'b1111; 4'b1011: out = 4'b1100;
+					4'b1100: out = 4'b0011; 4'b1101: out = 4'b1001;
+					4'b1110: out = 4'b1000; 4'b1111: out = 4'b0110;
+				endcase
+			2'b10: 
+				case(column)
+					4'b0000: out = 4'b0100; 4'b0001: out = 4'b0010;
+					4'b0010: out = 4'b0001; 4'b0011: out = 4'b1011;
+					4'b0100: out = 4'b1100; 4'b0101: out = 4'b1101;
+					4'b0110: out = 4'b0111; 4'b0111: out = 4'b1000;
+					4'b1000: out = 4'b1111; 4'b1001: out = 4'b1001;
+					4'b1010: out = 4'b1100; 4'b1011: out = 4'b0101;
+					4'b1100: out = 4'b0110; 4'b1101: out = 4'b0011;
+					4'b1110: out = 4'b0000; 4'b1111: out = 4'b1110;
+				endcase	
+			2'b11: 
+				case(column)
+					4'b0000: out = 4'b1011; 4'b0001: out = 4'b1000;
+					4'b0010: out = 4'b1100; 4'b0011: out = 4'b0111;
+					4'b0100: out = 4'b0001; 4'b0101: out = 4'b1110;
+					4'b0110: out = 4'b0010; 4'b0111: out = 4'b1101;
+					4'b1000: out = 4'b0110; 4'b1001: out = 4'b1111;
+					4'b1010: out = 4'b0000; 4'b1011: out = 4'b1001;
+					4'b1100: out = 4'b1100; 4'b1101: out = 4'b0100;
+					4'b1110: out = 4'b0101; 4'b1111: out = 4'b0011;
+				endcase
 
-        row = {in[5], in[0]};
-        colum = in[4:1];
-		
-        case(colum)
-            4'b0000: case(row) 2'b00: out = 4'b0010; 2'b01: out = 4'b1110; 2'b10: out = 4'b0100; 2'b11: out = 4'b1011; endcase
-            4'b0001: case(row) 2'b00: out = 4'b1100; 2'b01: out = 4'b1011; 2'b10: out = 4'b0010; 2'b11: out = 4'b1000; endcase
-            4'b0010: case(row) 2'b00: out = 4'b0100; 2'b01: out = 4'b0010; 2'b10: out = 4'b0001; 2'b11: out = 4'b1100; endcase
-            4'b0011: case(row) 2'b00: out = 4'b0001; 2'b01: out = 4'b1100; 2'b10: out = 4'b1011; 2'b11: out = 4'b0111; endcase
-            4'b0100: case(row) 2'b00: out = 4'b0111; 2'b01: out = 4'b0100; 2'b10: out = 4'b1100; 2'b11: out = 4'b0001; endcase
-            4'b0101: case(row) 2'b00: out = 4'b1010; 2'b01: out = 4'b0111; 2'b10: out = 4'b1101; 2'b11: out = 4'b1110; endcase
-            4'b0110: case(row) 2'b00: out = 4'b1011; 2'b01: out = 4'b1101; 2'b10: out = 4'b0111; 2'b11: out = 4'b0010; endcase
-            4'b0111: case(row) 2'b00: out = 4'b0110; 2'b01: out = 4'b0001; 2'b10: out = 4'b1000; 2'b11: out = 4'b1101; endcase
-            4'b1000: case(row) 2'b00: out = 4'b1000; 2'b01: out = 4'b0101; 2'b10: out = 4'b1111; 2'b11: out = 4'b0110; endcase
-            4'b1001: case(row) 2'b00: out = 4'b0101; 2'b01: out = 4'b0000; 2'b10: out = 4'b1001; 2'b11: out = 4'b1111; endcase
-            4'b1010: case(row) 2'b00: out = 4'b0011; 2'b01: out = 4'b1111; 2'b10: out = 4'b1100; 2'b11: out = 4'b0000; endcase
-            4'b1011: case(row) 2'b00: out = 4'b1111; 2'b01: out = 4'b1100; 2'b10: out = 4'b0101; 2'b11: out = 4'b1001; endcase
-            4'b1100: case(row) 2'b00: out = 4'b1101; 2'b01: out = 4'b0011; 2'b10: out = 4'b0110; 2'b11: out = 4'b1100; endcase
-            4'b1101: case(row) 2'b00: out = 4'b0000; 2'b01: out = 4'b1001; 2'b10: out = 4'b0011; 2'b11: out = 4'b0100; endcase
-            4'b1110: case(row) 2'b00: out = 4'b1110; 2'b01: out = 4'b1000; 2'b10: out = 4'b0000; 2'b11: out = 4'b0101; endcase
-            4'b1111: case(row) 2'b00: out = 4'b1001; 2'b01: out = 4'b0110; 2'b10: out = 4'b1110; 2'b11: out = 4'b0011; endcase 
-        endcase
-    end
+			// default not necessary 
+		endcase
+   	end
 endmodule
